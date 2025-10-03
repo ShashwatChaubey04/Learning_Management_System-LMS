@@ -1,27 +1,75 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { dummyCourses } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
+import humanizeDuration from 'humanize-duration'
 
 export const AppContext = createContext();
 export const AppContextProvider = ({children}) => {
 
-  const currency = import.meta.env.VITE_CURRENCY   
+  const currency = import.meta.env.VITE_CURRENCY  
+  const navigate = useNavigate() 
+
   const [allCourses, setAllCourses] = useState([])
-  
-  const value = {
-    currency
+  const [isEducator, setIsEducator] = useState(true)
+  const [enrolledCourses, setEnrolledCourses] = useState([])
+
+  // Fetch all Courses
+  const fetchAllCourses = async () => {
+    setAllCourses(dummyCourses)
   }
+  
+  // Function to calculate average rating of Courses
+  const calculateRating = (course) => {
+    if(course.courseRatings.length === 0) return 0;
+    let totalRating = 0
+    course.courseRatings.forEach(rating => {
+      totalRating += rating.rating
+    })
+    return totalRating/course.courseRatings.length
+  }
+
+  // Function to calculate Course chapter time
+  const  calculateChapterTime = (chapter) => {
+    let time = 0
+    chapter.chapterContent.map((lecture) => time += lecture.lectureDuration)
+    return humanizeDuration(time*60*1000, {units: ["h", "m"]})
+  }
+
+  // Function to calculate Course Duration 
+  const calculateCourseDuration = (course) => {
+    let time = 0
+    course.courseContent.map((chapter) => chapter.chapterContent.map((lecture) => time += lecture.lectureDuration))
+    return humanizeDuration(time*60*1000, {units: ["h", "m"]})
+  }
+
+  // Function to Calculate No of Lecture in Course
+  const calculateNoOfLectures = (course) => {
+    let totalLectures = 0
+    course.courseContent.forEach(chapter => {
+      if(Array.isArray(chapter.chapterContent)) {
+        totalLectures += chapter.chapterContent.length
+      }
+    })
+    return totalLectures
+  }
+
+  // Fetch user Enrolled Courses
+  const fetchUserEnrolledCourses = async () => {
+    setEnrolledCourses(dummyCourses)
+  }
+
+  useEffect(() => {
+    fetchAllCourses(),
+    fetchUserEnrolledCourses()
+  }, [])
+
+  const value = {
+    currency, allCourses, navigate, calculateRating, isEducator, setIsEducator, calculateChapterTime, calculateCourseDuration, calculateNoOfLectures, enrolledCourses, fetchUserEnrolledCourses
+  }
+
   return (
     <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   )
 }
-
-/*
-This code is used to create a global data storage in React.
-Instead of passing data from parent → child → grandchild → great-grandchild (which gets messy),
-You put the data in a Context (AppContext) and wrap your app with AppContextProvider.
-Now, any component inside can directly get that data without prop drilling.
-
-👉 Use case example in one line:
-If you want to share user info, theme (dark/light), or cart items across your whole app, you use this code.
-*/
