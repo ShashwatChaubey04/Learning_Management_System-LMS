@@ -3,7 +3,7 @@ import cors from 'cors'
 import 'dotenv/config' 
 import connectDB from './configs/mongodb.js'
 import { Webhook } from 'svix'
-import { clerkWebhooks } from './controllers/Webhooks.js'
+import { clerkWebhooks } from './controllers/webhooks.js'
 
 const app = express()
 
