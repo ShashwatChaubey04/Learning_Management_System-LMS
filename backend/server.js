@@ -6,10 +6,12 @@ import { Webhook } from 'svix'
 import { clerkWebhooks } from './controllers/webhooks.js'
 import educatorRouter from './routes/educatorRoutes.js'
 import { clerkMiddleware } from '@clerk/express'
+import connectCloudinary from './configs/cloudinary.js'
 
 const app = express()
 
 await connectDB()
+await connectCloudinary()
 
 // Connection of Backend with Other Domain
 app.use(cors())
